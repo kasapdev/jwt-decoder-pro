@@ -1,0 +1,158 @@
+/* =====================================================================
+   JWT Decoder Pro — app.css
+   Extends the shared design system (base.css). Colors derive ONLY from
+   base.css CSS variables so dark + light themes both work.
+   ===================================================================== */
+
+/* ---- Theme toggle icon swap (sun in dark, moon in light) ---- */
+[data-theme="light"] .icon-sun { display: none; }
+.icon-moon { display: none; }
+
+/* ===================== Status badge ===================== */
+#statusBadge .status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--text-muted); flex: none;
+  transition: background var(--dur-2), box-shadow var(--dur-2);
+}
+#statusBadge.is-valid { background: var(--success-soft); color: var(--success); border-color: transparent; }
+#statusBadge.is-valid .status-dot { background: var(--success); box-shadow: 0 0 10px var(--success); }
+#statusBadge.is-error { background: var(--danger-soft); color: var(--danger); border-color: transparent; }
+#statusBadge.is-error .status-dot { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
+#statusBadge.is-warning { background: var(--warning-soft); color: var(--warning); border-color: transparent; }
+#statusBadge.is-warning .status-dot { background: var(--warning); box-shadow: 0 0 10px var(--warning); }
+
+/* ===================== Notice ===================== */
+.notice-panel {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  color: var(--text-secondary);
+  font-size: 13.5px;
+}
+.notice-panel svg { width: 20px; height: 20px; flex: none; color: var(--info); margin-top: 2px; }
+.notice-panel p { margin: 0; }
+.notice-panel strong { color: var(--text); }
+
+/* ===================== Token panel ===================== */
+.token-panel { margin-top: var(--space-5); }
+.token-panel .pane-head { padding: 0 0 var(--space-3); border-bottom: none; }
+#tokenInput {
+  width: 100%;
+  min-height: 120px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  resize: vertical;
+  word-break: break-all;
+}
+.token-panel .toolbar { margin-top: var(--space-4); gap: var(--space-2); }
+
+/* ===================== Warnings ===================== */
+.warnings-row { margin-top: var(--space-5); }
+.warnings-row .badge { padding: 8px 14px; font-size: 13px; }
+
+/* ===================== Claims summary ===================== */
+.claims-panel { margin-top: var(--space-5); }
+.claims-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+.claim-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+.claim-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.claim-value {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--text);
+  word-break: break-word;
+}
+.claim-sub {
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.claim-sub.is-expired { color: var(--danger); }
+.claim-sub.is-active { color: var(--success); }
+
+/* ===================== Header / payload editor ===================== */
+.editor {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+  margin-top: var(--space-5);
+}
+.pane { display: flex; flex-direction: column; padding: 0; overflow: hidden; min-width: 0; }
+.pane-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--space-3); padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border);
+}
+.pane-title { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-secondary); }
+.pane-meta { font-size: 12px; }
+
+.output-scroll { position: relative; flex: 1; min-height: 220px; overflow: auto; }
+.output-code { margin: 0; padding: var(--space-5); font-size: 13px; line-height: 1.7; white-space: pre-wrap; word-break: break-word; min-height: 100%; }
+.output-code:empty { display: none; }
+.output-empty {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: var(--space-3); pointer-events: none;
+}
+.output-empty p { margin: 0; }
+.output-empty.is-hidden { display: none; }
+
+/* ===================== Syntax highlighting ===================== */
+.tok-key      { color: var(--brand-400); font-weight: 600; }
+.tok-string   { color: var(--success); }
+.tok-number   { color: var(--accent-cyan); }
+.tok-boolean  { color: var(--accent-pink); font-weight: 600; }
+.tok-null     { color: var(--text-muted); font-style: italic; }
+.tok-punct    { color: var(--text-secondary); }
+.tok-brace    { color: var(--accent-500); font-weight: 600; }
+
+[data-theme="light"] .tok-string { color: #15803d; }
+[data-theme="light"] .tok-number { color: #0e7490; }
+[data-theme="light"] .tok-key    { color: var(--brand-600); }
+
+/* ===================== Error panel ===================== */
+.error-panel {
+  margin-top: var(--space-5);
+  border-color: var(--danger);
+  background: linear-gradient(var(--danger-soft), var(--danger-soft)), var(--glass);
+}
+.error-head { display: flex; align-items: center; gap: var(--space-3); color: var(--danger); margin-bottom: var(--space-3); }
+.error-head svg { width: 20px; height: 20px; flex: none; }
+.error-head strong { font-size: 15px; }
+.error-msg { margin: 0; color: var(--text); font-size: 13.5px; word-break: break-word; }
+
+/* ===================== Shortcuts modal table ===================== */
+.shortcut-table { width: 100%; border-collapse: collapse; }
+.shortcut-table td { padding: 10px 4px; border-bottom: 1px solid var(--border); font-size: 14px; }
+.shortcut-table tr:last-child td { border-bottom: none; }
+.shortcut-table td:last-child { text-align: right; white-space: nowrap; }
+.shortcut-table kbd + kbd { margin-left: 4px; }
+
+/* ===================== Responsive ===================== */
+@media (max-width: 860px) {
+  .editor { grid-template-columns: 1fr; }
+  .output-scroll { min-height: 200px; }
+}
+@media (max-width: 720px) {
+  #statusBadge { display: none; }
+  .claims-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 460px) {
+  .claims-grid { grid-template-columns: 1fr; }
+}
