@@ -45,6 +45,7 @@ Then simply open `index.html` in any modern browser (double-click it, or `file:/
 
 | Action               | Shortcut          |
 | -------------------- | ------------------ |
+| Decode now             | <kbd>Ctrl/⌘</kbd> + <kbd>Enter</kbd> |
 | Clear token           | <kbd>Ctrl/⌘</kbd> + <kbd>K</kbd> |
 | Show shortcuts help   | <kbd>?</kbd>        |
 | Close dialog          | <kbd>Esc</kbd>      |

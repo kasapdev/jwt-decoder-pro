@@ -38,6 +38,10 @@
   var lastPayloadJson = '';
   var liveIntervals = [];
 
+  /* Standard claims rendered in their own dedicated cards above — every
+     other top-level payload claim is still shown, just generically. */
+  var KNOWN_CLAIMS = { iss: 1, sub: 1, aud: 1, exp: 1, iat: 1, nbf: 1 };
+
   /* =================================================================
      BASE64URL DECODE (UTF-8 safe)
      ================================================================= */
@@ -55,6 +59,20 @@
     }
     // Fallback for very old browsers.
     return decodeURIComponent(escape(binary));
+  }
+
+  function base64UrlEncodeString(str) {
+    var bytes;
+    if (window.TextEncoder) {
+      bytes = new TextEncoder().encode(str);
+    } else {
+      var utf8 = unescape(encodeURIComponent(str));
+      bytes = new Uint8Array(utf8.length);
+      for (var i = 0; i < utf8.length; i++) bytes[i] = utf8.charCodeAt(i);
+    }
+    var binary = '';
+    for (var j = 0; j < bytes.length; j++) binary += String.fromCharCode(bytes[j]);
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }
 
   /* =================================================================
@@ -159,6 +177,9 @@
       } else if (kind === 'nbf') {
         if (d.neg) { el.textContent = 'Valid since ' + d.text + ' ago'; el.className = 'claim-sub is-active'; }
         else { el.textContent = 'Not valid for another ' + d.text; el.className = 'claim-sub is-expired'; }
+      } else if (kind === 'iat') {
+        if (d.neg) { el.textContent = 'Issued ' + d.text + ' ago'; el.className = 'claim-sub'; }
+        else { el.textContent = 'Issued ' + d.text + ' from now'; el.className = 'claim-sub'; }
       }
     }
     tick();
@@ -205,7 +226,9 @@
       attachLiveCountdown(expSub, Number(payload.exp), 'exp');
     }
     if (payload && payload.iat !== undefined && !isNaN(Number(payload.iat))) {
-      claimsGrid.appendChild(claimCard('iat (issued at)', humanDate(payload.iat)));
+      var iatSub = document.createElement('div'); iatSub.className = 'claim-sub';
+      claimsGrid.appendChild(claimCard('iat (issued at)', humanDate(payload.iat), iatSub));
+      attachLiveCountdown(iatSub, Number(payload.iat), 'iat');
     }
     if (payload && payload.nbf !== undefined && !isNaN(Number(payload.nbf))) {
       var nbfSub = document.createElement('div'); nbfSub.className = 'claim-sub';
@@ -217,6 +240,16 @@
     if (payload && payload.aud !== undefined) {
       var aud = Array.isArray(payload.aud) ? payload.aud.join(', ') : String(payload.aud);
       claimsGrid.appendChild(claimCard('aud', aud));
+    }
+
+    // Any other top-level payload claims, shown generically.
+    if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+      Object.keys(payload).sort().forEach(function (key) {
+        if (KNOWN_CLAIMS[key]) return;
+        var v = payload[key];
+        var text = v === null ? 'null' : (typeof v === 'object' ? JSON.stringify(v) : String(v));
+        claimsGrid.appendChild(claimCard(key, text));
+      });
     }
 
     claimsPanel.hidden = claimsGrid.children.length === 0 && headerBadges.children.length === 0;
@@ -321,10 +354,30 @@
     tokenInput.focus();
   }
 
-  var SAMPLE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFkYSBMb3ZlbGFjZSIsImlhdCI6MTcxMDAwMDAwMCwiZXhwIjoxNzQxNTM2MDAwLCJpc3MiOiJ3ZWItdXRpbGl0eS1zdWl0ZSJ9.dGhpcy1pcy1ub3QtYS1yZWFsLXNpZ25hdHVyZQ';
+  /* Builds a realistic, entirely fake sample JWT client-side — header and
+     payload are base64url-encoded locally, the signature segment is a
+     harmless dummy string. No network call, no real JWT service involved. */
+  function buildSampleToken() {
+    var now = Math.floor(Date.now() / 1000);
+    var header = { alg: 'HS256', typ: 'JWT' };
+    var payload = {
+      sub: '1234567890',
+      name: 'Ada Lovelace',
+      iss: 'https://auth.example.com',
+      aud: 'https://api.example.com',
+      roles: ['admin', 'engineer'],
+      iat: now - 300,
+      nbf: now - 300,
+      exp: now + 3600
+    };
+    var headerPart = base64UrlEncodeString(JSON.stringify(header));
+    var payloadPart = base64UrlEncodeString(JSON.stringify(payload));
+    var signaturePart = base64UrlEncodeString('sample-signature-not-a-real-hmac-do-not-trust');
+    return headerPart + '.' + payloadPart + '.' + signaturePart;
+  }
 
   function loadSample() {
-    tokenInput.value = SAMPLE;
+    tokenInput.value = buildSampleToken();
     updateTokenStats();
     decode();
     persist();
@@ -360,6 +413,7 @@
   var shortcutRows = document.getElementById('shortcutRows');
 
   var SHORTCUTS = [
+    { keys: ['mod', '⏎'], desc: 'Decode now' },
     { keys: ['mod', 'K'], desc: 'Clear token' },
     { keys: ['?'], desc: 'Show this help' },
     { keys: ['Esc'], desc: 'Close dialog' }
@@ -399,6 +453,14 @@
     persistDebounced();
   });
 
+  tokenInput.addEventListener('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      decode();
+    }
+  });
+
+  WUS.registerShortcut('mod+enter', function () { decode(); }, 'Decode now');
   WUS.registerShortcut('mod+k', function () { clearAll(); }, 'Clear token');
   WUS.registerShortcut('?', function () { openHelp(); }, 'Show shortcuts');
 
