@@ -46,7 +46,11 @@
      BASE64URL DECODE (UTF-8 safe)
      ================================================================= */
   function base64UrlDecodeToString(seg) {
-    var b64 = seg.replace(/-/g, '+').replace(/_/g, '/');
+    // Strip any whitespace picked up from copy/paste (line wraps in a
+    // terminal, email, or code block) before computing padding — otherwise
+    // a stray newline/space throws off the length%4 check even though the
+    // underlying base64 data is perfectly valid.
+    var b64 = seg.replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/');
     var pad = b64.length % 4;
     if (pad === 2) b64 += '==';
     else if (pad === 3) b64 += '=';
